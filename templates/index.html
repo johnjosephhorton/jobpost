@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <title>Job Description Generator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Handle form submission with AJAX
+            $('form').submit(function(event) {
+                event.preventDefault();
+                var job_title = $('#job_title').val();
+		var skills = $('#skills').val();
+		var duration = $('#duration').val();
+                $('#job_description').val('');
+                $('#spinner').show();
+                $.ajax({
+                    url: '/',
+                    type: 'POST',
+                    data: $('form').serialize(),
+                    success: function(response) {
+                        $('#job_description').val(response.job_description);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    },
+                    complete: function() {
+                        $('#spinner').hide();
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <h1 class="text-center mb-4">Job Description Generator</h1>
+	
+    <form method="post">
+        <label for="job_title">Job Title:</label>
+        <input type="text" id="job_title" name="job_title">	
+	<br>
+        <label for="skills">Skills:</label>
+	<input type="text" id="skills" name="skills">
+	<br>
+	<label for="duration">Duration:</label>
+	<input type="text" id="duration" name="duration">
+        <br>
+        <input type="submit" value="Generate Job Description">
+    </form>
+    <textarea id="job_description" rows="20" cols="50"></textarea>
+      	<div id="spinner" class="text-center" style="display: none;">
+	  <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+      </div>
+	  
+    <br>
+
+
+      </div>
+    </div>
+  </div>
+  
+</body>
+</html>
