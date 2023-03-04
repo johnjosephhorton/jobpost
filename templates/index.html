@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html>
+
+    <style>
+    /* Set the width of the input element to 200px */
+    input[name="action"] {
+      width: 400px;
+    }
+    </style>
+    
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <title>Job Description Generator</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -28,6 +36,25 @@
                     }
                 });
             });
+
+	    
+	    $('#modify').click(function(event) {
+		$('#spinner').show();
+		event.preventDefault(); // prevent the default action
+		// Call the function using Ajax
+		$.ajax({
+		    url: '/modify',
+		    type: 'POST',
+		    data: {'job_description': $('#job_description').val(),
+			   'action': $('input[name="action"]').val() },
+		    success: function(response) {
+			$('#job_description').val(response.job_description);
+		    },
+		    complete: function() {
+                        $('#spinner').hide();
+                    }
+		});
+	    });
         });
     </script>
 </head>
@@ -50,18 +77,36 @@
         <br>
         <input type="submit" value="Generate Job Description">
     </form>
-    <textarea id="job_description" rows="20" cols="50"></textarea>
-      	<div id="spinner" class="text-center" style="display: none;">
-	  <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
+    <textarea id="job_description" rows="10" cols="50"></textarea>
+    <h3>Description modifications</h3>
+
+    <label>This this job description and:</label><br>
+    <input list="modifications" name="action">
+    <datalist id="modifications">
+        <option value="shorten it">
+        <option value="lengthen it">
+        <option value="make it clear you want real experts">
+	<option value="use a bulleted list for key points">
+	<option value="make it clear this is an entry level position">
+	<option value="make it clear this job is super dangerous">
+	<option value="make it less formal">
+	<option value="make it more formal">
+	<option value="put in style of a pirate">
+	<option value="translate it to German">
+	<option value="make it more welcoming to diverse candidates">
+    </datalist> <br><br>
+    <input id="modify" type="submit" value="Modify job description">
+    <div id="spinner" class="text-center" style="display: none;">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
       </div>
-	  
+      
     <br>
 
-
+    
+    </div>
       </div>
     </div>
-  </div>
-  
+    
 </body>
 </html>

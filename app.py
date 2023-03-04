@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, jsonify
 import openai
 import os
@@ -12,7 +13,6 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 # Initialize the Flask app
 app = Flask(__name__)
 
-# Configure OpenAI API credentials
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def gen_prompt(job_description, duration, skills):
@@ -21,11 +21,30 @@ def gen_prompt(job_description, duration, skills):
     # Given a job length of '{duration}'
     # Given job skills of {skills}
     # Write a detailed job description, without a title
-    ## Ask the candidate to submit a proposal
-    ## The candidate's should describe how they can help with the project
-    ## The candidate should include some links to past completed projects
     """
     return base_prompt
+
+
+def modify_job_description(action, job_description):
+    response = openai.Edit.create(
+        model="text-davinci-edit-001",
+        input=job_description,
+        instruction=f"Take this job description and {action}.",
+        temperature=0.2,
+        top_p=1
+    )
+    new_job_description = response.choices[0].text
+    return new_job_description
+
+@app.route('/modify', methods = ['POST'])
+def modify():
+    print("getting here")
+    print(request.form)
+    if request.method == 'POST':
+        job_description = request.form['job_description']
+        action = request.form['action']
+        new_job_description = modify_job_description(action, job_description)
+    return jsonify({'job_description': new_job_description})
 
 # Define the home page route
 @app.route('/', methods=['GET', 'POST'])
