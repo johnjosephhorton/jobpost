@@ -3,7 +3,10 @@ from flask import Flask, render_template, request, jsonify
 import openai
 import os
 import dotenv
+import random
+import json 
 
+from replit import db
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,6 +17,12 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 app = Flask(__name__)
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+if "generations" not in db.keys():
+  db['generations'] = json.dumps([])
+
+if "modifications" not in db.keys():
+  db['modifications'] = json.dumps([])
 
 def gen_prompt(job_description, duration, skills):
     base_prompt = f""" 
@@ -44,6 +53,14 @@ def modify():
         job_description = request.form['job_description']
         action = request.form['action']
         new_job_description = modify_job_description(action, job_description)
+
+        data = {'job_description': job_description, 
+               'action': action, 
+               'new_job_description': new_job_description}
+        old_data = json.loads(db['modifications'])
+        old_data.append(data)
+        db['modifications'] = json.dumps(old_data)
+
     return jsonify({'job_description': new_job_description})
 
 # Define the home page route
@@ -68,6 +85,14 @@ def home():
         # Get the generated job description from the API response
         job_description = response.choices[0].text
 
+        data = {'job_title': job_title,'skills': skills, 
+                'duration': duration, 
+                'job_description': job_description}
+
+        old_data = json.loads(db['generations'])
+        old_data.append(data)
+        db['generations'] = json.dumps(old_data)
+
         # Return the job description as JSON
         return jsonify({'job_description': job_description})
 
@@ -76,6 +101,9 @@ def home():
 
 # Run the app
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = True, # Starts the site
+		host='0.0.0.0',  # EStablishes the host, required for repl to detect the site
+		port=random.randint(2000, 9000)  # Randomly select the port the machine hosts on.
+	 )
 
     
