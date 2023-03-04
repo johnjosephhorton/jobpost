@@ -18,12 +18,13 @@ app = Flask(__name__)
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-if "generations" not in db.keys():
-  db['generations'] = json.dumps([])
+if db:
+  if "generations" not in db.keys():
+    db['generations'] = json.dumps([])
 
-if "modifications" not in db.keys():
-  db['modifications'] = json.dumps([])
-
+    if "modifications" not in db.keys():
+      db['modifications'] = json.dumps([])
+  
 def gen_prompt(job_description, duration, skills):
     base_prompt = f""" 
     # Given a job title of {job_description}'
@@ -54,13 +55,14 @@ def modify():
         action = request.form['action']
         new_job_description = modify_job_description(action, job_description)
 
-        data = {'job_description': job_description, 
-               'action': action, 
-               'new_job_description': new_job_description}
-        old_data = json.loads(db['modifications'])
-        old_data.append(data)
-        db['modifications'] = json.dumps(old_data)
-
+        if db:
+          data = {'job_description': job_description, 
+                  'action': action, 
+                  'new_job_description': new_job_description}
+          old_data = json.loads(db['modifications'])
+          old_data.append(data)
+          db['modifications'] = json.dumps(old_data)
+          
     return jsonify({'job_description': new_job_description})
 
 # Define the home page route
@@ -85,13 +87,14 @@ def home():
         # Get the generated job description from the API response
         job_description = response.choices[0].text
 
-        data = {'job_title': job_title,'skills': skills, 
+        if db:
+          data = {'job_title': job_title,'skills': skills, 
                 'duration': duration, 
                 'job_description': job_description}
-
-        old_data = json.loads(db['generations'])
-        old_data.append(data)
-        db['generations'] = json.dumps(old_data)
+          
+          old_data = json.loads(db['generations'])
+          old_data.append(data)
+          db['generations'] = json.dumps(old_data)
 
         # Return the job description as JSON
         return jsonify({'job_description': job_description})
