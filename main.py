@@ -22,8 +22,8 @@ if db:
   if "generations" not in db.keys():
     db['generations'] = json.dumps([])
 
-    if "modifications" not in db.keys():
-      db['modifications'] = json.dumps([])
+  if "modifications" not in db.keys():
+    db['modifications'] = json.dumps([])
   
 def gen_prompt(job_description, duration, skills):
     base_prompt = f""" 
